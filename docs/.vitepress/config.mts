@@ -22,33 +22,32 @@ export default defineConfig({
     ],
 
     // ── 侧边栏 ────────────────────────────────────────────────────────────
-    sidebar: {
-      '/theory/': [
-        {
-          text: '理论篇',
-          items: [
-            { text: '第 1 章　语言模型是什么', link: '/theory/ch1' },
-            { text: '第 2 章　词嵌入：把文字变成向量', link: '/theory/ch2' },
-            { text: '第 3 章　循环神经网络（RNN）', link: '/theory/ch3' },
-            { text: '第 4 章　训练原理', link: '/theory/ch4' },
-            { text: '第 5 章　文本生成与推理策略', link: '/theory/ch5' },
-          ],
-        },
-      ],
-      '/practice/': [
-        {
-          text: '实践篇',
-          items: [
-            { text: '第 6 章　项目结构与数据准备', link: '/practice/ch6' },
-            { text: '第 7 章　构建词表与数据集', link: '/practice/ch7' },
-            { text: '第 8 章　搭建模型', link: '/practice/ch8' },
-            { text: '第 9 章　训练流程', link: '/practice/ch9' },
-            { text: '第 10 章　生成古诗', link: '/practice/ch10' },
-            { text: '第 11 章　动手实验：调参与观察', link: '/practice/ch11' },
-          ],
-        },
-      ],
-    },
+    // 两篇章始终同时显示，支持跨篇章快速跳转
+    sidebar: [
+      {
+        text: '理论篇',
+        collapsed: false,
+        items: [
+          { text: '第 1 章　语言模型是什么', link: '/theory/ch1' },
+          { text: '第 2 章　词嵌入：把文字变成向量', link: '/theory/ch2' },
+          { text: '第 3 章　循环神经网络（RNN）', link: '/theory/ch3' },
+          { text: '第 4 章　训练原理', link: '/theory/ch4' },
+          { text: '第 5 章　文本生成与推理策略', link: '/theory/ch5' },
+        ],
+      },
+      {
+        text: '实践篇',
+        collapsed: false,
+        items: [
+          { text: '第 6 章　项目结构与数据准备', link: '/practice/ch6' },
+          { text: '第 7 章　构建词表与数据集', link: '/practice/ch7' },
+          { text: '第 8 章　搭建模型', link: '/practice/ch8' },
+          { text: '第 9 章　训练流程', link: '/practice/ch9' },
+          { text: '第 10 章　生成古诗', link: '/practice/ch10' },
+          { text: '第 11 章　动手实验：调参与观察', link: '/practice/ch11' },
+        ],
+      },
+    ],
 
     // ── 页脚与社交链接 ─────────────────────────────────────────────────────
     socialLinks: [

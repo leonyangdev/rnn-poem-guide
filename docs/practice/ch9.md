@@ -48,17 +48,56 @@ for i, (x, y) in enumerate(dataloader):
 
 ## 9.3 为什么需要 transpose(1, 2)
 
-`nn.CrossEntropyLoss` 的接口要求：
-- **预测**：形状 `(N, C, d1, d2, ...)`，C 为类别数必须在第 1 轴
-- **目标**：形状 `(N, d1, d2, ...)`
+这是实践中最容易出错的形状操作，值得单独讲清楚。
 
-我们的 `logits` 形状是 `(N, L, V)`，需要通过 `.transpose(1, 2)` 变成 `(N, V, L)`：
+### CrossEntropyLoss 对形状的规定
+
+`nn.CrossEntropyLoss` 处理序列分类时，要求：
+- **预测**：形状 `(N, C, L)`，**C（类别数）必须在第 1 轴**
+- **目标**：形状 `(N, L)`
+
+### 我们的 logits 形状是什么
+
+模型输出的 `logits` 形状是 `(N, L, V)`：
+
+```
+logits.shape = (32, 24, 2439)
+               N   L   V
+               │   │   └── 第 2 轴：对词表的打分（类别）
+               │   └────── 第 1 轴：序列位置
+               └────────── 第 0 轴：样本
+```
+
+问题在于：**V（类别维）在第 2 轴，但 CrossEntropyLoss 要求类别在第 1 轴。**
+
+### transpose(1, 2) 做了什么
+
+`.transpose(1, 2)` 把**第 1 轴和第 2 轴互换**：
+
+```
+logits         (N=32, L=24, V=2439)
+    ↓ .transpose(1, 2)
+               (N=32, V=2439, L=24)   ← V 换到了第 1 轴 ✓
+
+y.shape      = (N=32, L=24)           ← 目标不需要变
+```
 
 ```python
-logits.shape         # (32, 24, 2439)
-logits.transpose(1,2).shape  # (32, 2439, 24)  ← CrossEntropyLoss 需要的形状
-y.shape              # (32, 24)
+# 可以用 .shape 验证
+print(logits.shape)               # torch.Size([32, 24, 2439])
+print(logits.transpose(1,2).shape)# torch.Size([32, 2439, 24])
+print(y.shape)                    # torch.Size([32, 24])
+
+loss = criterion(logits.transpose(1, 2), y)   # ✓ 形状匹配
 ```
+
+::: warning 常见错误
+如果忘记 transpose 直接传 `logits`，PyTorch 会抛出：
+```
+RuntimeError: Expected target size (32, 2439), got torch.Size([32, 24])
+```
+这个报错信息很迷惑——它把 L=24 误当成类别维来检查，导致错误信息与真实原因对不上。遇到这个报错，先检查 transpose 是否漏写。
+:::
 
 ---
 

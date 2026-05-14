@@ -77,6 +77,61 @@ $y_t$ 是对 $x_{t+1}$ 的预测，即给定前 $t$ 个字，预测第 $t+1$ 个
 
 ---
 
+## 3.5 维度详解：output 和 hidden 的区别
+
+PyTorch 的 RNN 返回**两个**张量，很多同学会在这里卡住：
+
+```python
+output, hidden = rnn(embedded, hx)
+```
+
+**它们有什么区别？**
+
+### output — 所有时间步的最后一层隐藏状态
+
+```
+output.shape = (N, L, H)
+```
+
+- 轴 0（N）：批次中的第几条样本
+- 轴 1（L）：序列的第几个时间步
+- 轴 2（H）：该时间步的隐藏向量（hidden_size 维）
+
+`output` 包含**每一个时间步**的结果，因为语言模型需要在每个位置都预测下一个字，所以我们用 `output` 接上 Linear 层输出 logits。
+
+### hidden — 序列结束后所有层的隐藏状态
+
+```
+hidden.shape = (num_layers, N, H)
+```
+
+- 轴 0（num_layers）：第几层 RNN
+- 轴 1（N）：批次中的第几条样本
+- 轴 2（H）：该层最终隐藏向量
+
+`hidden` 只保存**最后一个时间步**的隐藏状态，且按层堆叠。它的作用是把"记忆"传递给下一次调用。
+
+### 用图理解两者的关系（以 2 层 RNN、序列长 4 为例）
+
+```
+时间步:        t=1      t=2      t=3      t=4
+               │        │        │        │
+Layer 1:  h¹₀→[RNN]→h¹₁→[RNN]→h¹₂→[RNN]→h¹₃→[RNN]→h¹₄
+                ↓        ↓        ↓        ↓
+Layer 2:  h²₀→[RNN]→h²₁→[RNN]→h²₂→[RNN]→h²₃→[RNN]→h²₄
+                ↓        ↓        ↓        ↓
+              out₁     out₂     out₃     out₄
+
+output  = [out₁, out₂, out₃, out₄]          # shape: (N, L=4, H)  ← 所有时间步
+hidden  = [h¹₄, h²₄]                        # shape: (layers=2, N, H) ← 最后时间步，所有层
+```
+
+::: warning 常见误解
+`output[:, -1, :]`（output 最后时间步的最后一层）与 `hidden[-1]`（hidden 最后一层）在数值上是**相等的**。两者都指向 $h^2_4$——但它们的用途不同：output 用于逐步预测，hidden 用于传递状态。
+:::
+
+---
+
 ## 3.5 梯度消失与梯度爆炸
 
 展开后的 RNN 本质上是一个很深的网络（深度 = 序列长度）。反向传播时，梯度需要沿时间步反向流动：
