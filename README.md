@@ -22,35 +22,41 @@
 | 第 10 章 | 生成古诗 |
 | 第 11 章 | 动手实验：调参与观察 |
 
-## 配套代码
-
-代码位于 [`poems/`](../.) 目录：
+## 仓库结构
 
 ```
-poems/
-├── config.py       # 超参数配置
-├── dataset.py      # 数据预处理 + PoemDataset
-├── model.py        # PoemRNNLM 模型
-├── trainer.py      # 训练循环
-├── generator.py    # 诗歌生成
-├── main.py         # 主入口
-└── data/
-    └── poems.txt   # 313 首唐诗语料
+rnn-poem-guide/
+├── src/                    # Python 源代码
+│   ├── config.py           # 超参数配置
+│   ├── dataset.py          # 数据预处理 + PoemDataset
+│   ├── model.py            # PoemRNNLM 模型
+│   ├── trainer.py          # 训练循环
+│   ├── generator.py        # 诗歌生成
+│   ├── main.py             # 主入口
+│   └── data/
+│       └── poems.txt       # 313 首唐诗语料
+├── docs/                   # VitePress 文档源文件
+│   ├── .vitepress/
+│   ├── theory/             # 理论篇（第 1–5 章）
+│   └── practice/           # 实践篇（第 6–11 章）
+├── README.md
+└── LICENSE
 ```
 
-运行方式：
+## 运行代码
+
+依赖：Python 3.8+、PyTorch 2.0+
 
 ```bash
-cd poems/
+cd src/
 python main.py
 ```
 
-支持设备：CUDA（NVIDIA GPU）/ MPS（Apple Silicon）/ CPU，自动检测。
+支持设备自动检测：CUDA（NVIDIA GPU）→ MPS（Apple Silicon）→ CPU。
 
 ## 本地预览文档
 
 ```bash
-cd rnn-poem-guide/
 npm install
 npm run docs:dev
 ```
